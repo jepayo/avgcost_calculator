@@ -1,1030 +1,743 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="UTF-8" />
-    <title>Calculadora de Precio Medio Ponderado</title>
-    <style>
-        :root {
-            --bg: #0f172a;
-            --bg-alt: #020617;
-            --card: #020617;
-            --accent: #38bdf8;
-            --accent-soft: rgba(56, 189, 248, 0.12);
-            --text: #e5e7eb;
-            --text-soft: #9ca3af;
-            --border: #1f2937;
-            --danger: #f97373;
-            --radius-lg: 16px;
-            --radius-xl: 24px;
-            --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.7);
-        }
-
-        * {
-            box-sizing: border-box;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-        }
-
-        body {
-            margin: 0;
-            padding: 24px;
-            background: radial-gradient(circle at top, #1f2937 0, #020617 40%, #000 100%);
-            color: var(--text);
-            min-height: 100vh;
-            display: flex;
-            align-items: stretch;
-            justify-content: center;
-        }
-
-        .app {
-            width: 100%;
-            max-width: 1100px;
-            background: linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.99));
-            border-radius: 28px;
-            box-shadow: var(--shadow-soft);
-            border: 1px solid rgba(148, 163, 184, 0.2);
-            padding: 24px 24px 18px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .app::before {
-            content: "";
-            position: absolute;
-            inset: -40%;
-            background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 55%), radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.16), transparent 60%);
-            opacity: 0.6;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        header {
-            display: flex;
-            justify-content: space-between;
-            gap: 16px;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        header h1 {
-            font-size: 22px;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        header h1 span.logo-pill {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 26px;
-            height: 26px;
-            border-radius: 999px;
-            background: radial-gradient(circle at 30% 30%, #e0f2fe, #38bdf8);
-            color: #020617;
-            font-weight: 700;
-            font-size: 16px;
-            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.3), 0 12px 20px rgba(15, 23, 42, 0.9);
-        }
-
-        header p {
-            margin: 0;
-            font-size: 13px;
-            color: var(--text-soft);
-        }
-
-        .tagline {
-            font-size: 12px;
-            color: var(--text-soft);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 10px;
-            border-radius: 999px;
-            background: rgba(15, 23, 42, 0.9);
-            border: 1px solid rgba(148, 163, 184, 0.35);
-        }
-
-        .tag-dot {
-            width: 7px;
-            height: 7px;
-            border-radius: 999px;
-            background: var(--accent);
-            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.35);
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.2fr);
-            gap: 18px;
-        }
-
-        @media (max-width: 900px) {
-            .grid {
-                grid-template-columns: minmax(0, 1fr);
-            }
-        }
-
-        .card {
-            background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.94), rgba(15, 23, 42, 0.98));
-            border-radius: var(--radius-xl);
-            border: 1px solid rgba(148, 163, 184, 0.22);
-            padding: 16px 16px 14px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .card::after {
-            content: "";
-            position: absolute;
-            inset: -10%;
-            opacity: 0.18;
-            background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.28), transparent 60%);
-            mix-blend-mode: screen;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            gap: 10px;
-        }
-
-        .card-header h2 {
-            font-size: 14px;
-            margin: 0;
-            letter-spacing: 0.03em;
-            text-transform: uppercase;
-            color: #e5e7eb;
-        }
-
-        .pill {
-            font-size: 11px;
-            padding: 3px 8px;
-            border-radius: 999px;
-            background: rgba(15, 23, 42, 0.9);
-            border: 1px solid rgba(148, 163, 184, 0.6);
-            color: var(--text-soft);
-        }
-
-        .inputs-row {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .field {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            font-size: 12px;
-        }
-
-        .field label {
-            color: var(--text-soft);
-            display: flex;
-            justify-content: space-between;
-            gap: 4px;
-            align-items: baseline;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .field label span.value-hint {
-            color: #9ca3af;
-            font-weight: 500;
-        }
-
-        .field input[type="number"] {
-            width: 100%;
-            padding: 7px 9px;
-            border-radius: 12px;
-            border: 1px solid rgba(55, 65, 81, 0.9);
-            background: rgba(15, 23, 42, 0.96);
-            color: var(--text);
-            font-size: 13px;
-            outline: none;
-            transition: border 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-        }
-
-        .field input[type="number"]:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.7), 0 10px 25px rgba(15, 23, 42, 0.9);
-            background: #020617;
-        }
-
-        .field input[type="number"]::-webkit-outer-spin-button,
-        .field input[type="number"]::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        .field input[type="number"] {
-            -moz-appearance: textfield;
-        }
-
-        .hint-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 8px;
-            font-size: 11px;
-            color: var(--text-soft);
-            margin-bottom: 6px;
-        }
-
-        .hint-row span {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .chip {
-            padding: 2px 7px;
-            border-radius: 999px;
-            border: 1px solid rgba(148, 163, 184, 0.4);
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-        }
-
-        .sliders {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .slider-card {
-            background: rgba(15, 23, 42, 0.96);
-            border-radius: 16px;
-            border: 1px solid rgba(31, 41, 55, 0.9);
-            padding: 8px 10px 9px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .slider-card::before {
-            content: "";
-            position: absolute;
-            inset: -40%;
-            background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.22), transparent 60%);
-            opacity: 0.06;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .slider-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 11px;
-            margin-bottom: 4px;
-            gap: 8px;
-        }
-
-        .slider-title {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .slider-title span.label {
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            font-size: 10px;
-            color: var(--text-soft);
-        }
-
-        .slider-title span.main {
-            font-size: 11px;
-            font-weight: 600;
-            color: #e5e7eb;
-        }
-
-        .lock-toggle {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 10px;
-            color: var(--text-soft);
-            cursor: pointer;
-            user-select: none;
-            padding: 2px 6px;
-            border-radius: 999px;
-            border: 1px solid rgba(55, 65, 81, 0.9);
-            background: rgba(15, 23, 42, 0.95);
-        }
-
-        .lock-toggle input {
-            accent-color: var(--accent);
-        }
-
-        .slider-body {
-            display: grid;
-            grid-template-columns: minmax(0, 1.6fr) minmax(0, 0.85fr);
-            gap: 8px;
-            align-items: center;
-        }
-
-        .slider-row {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .slider-row input[type="range"] {
-            width: 100%;
-            -webkit-appearance: none;
-            appearance: none;
-            background: transparent;
-        }
-
-        .slider-row input[type="range"]::-webkit-slider-runnable-track {
-            height: 6px;
-            border-radius: 999px;
-            background: linear-gradient(90deg, rgba(56, 189, 248, 0.2), rgba(56, 189, 248, 0.6));
-        }
-
-        .slider-row input[type="range"]::-moz-range-track {
-            height: 6px;
-            border-radius: 999px;
-            background: linear-gradient(90deg, rgba(56, 189, 248, 0.2), rgba(56, 189, 248, 0.6));
-        }
-
-        .slider-row input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: #e5e7eb;
-            border: 2px solid #020617;
-            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.9), 0 0 0 5px rgba(56, 189, 248, 0.7);
-            margin-top: -4px;
-        }
-
-        .slider-row input[type="range"]::-moz-range-thumb {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: #e5e7eb;
-            border: 2px solid #020617;
-            box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.9), 0 0 0 5px rgba(56, 189, 248, 0.7);
-        }
-
-        .slider-minmax {
-            display: flex;
-            justify-content: space-between;
-            font-size: 10px;
-            color: var(--text-soft);
-            margin-top: 1px;
-        }
-
-        .slider-value input[type="number"] {
-            width: 100%;
-            padding: 5px 7px;
-            border-radius: 10px;
-            border: 1px solid rgba(55, 65, 81, 0.95);
-            background: rgba(15, 23, 42, 0.98);
-            color: var(--text);
-            font-size: 12px;
-            text-align: right;
-        }
-
-        .slider-value input[type="number"]:focus {
-            border-color: var(--accent);
-            outline: none;
-            box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.6), 0 8px 18px rgba(15, 23, 42, 0.9);
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 8px;
-            margin-top: 4px;
-        }
-
-        .stat {
-            background: rgba(15, 23, 42, 0.98);
-            border-radius: 14px;
-            border: 1px solid rgba(31, 41, 55, 0.9);
-            padding: 5px 8px;
-            font-size: 11px;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .stat span.label {
-            color: var(--text-soft);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            font-size: 9px;
-        }
-
-        .stat span.value {
-            font-weight: 600;
-            font-size: 11px;
-        }
-
-        .stat span.delta {
-            font-size: 10px;
-        }
-
-        .delta-better {
-            color: #4ade80;
-        }
-
-        .delta-worse {
-            color: #f97373;
-        }
-
-        .delta-neutral {
-            color: var(--text-soft);
-        }
-
-        .disabled-overlay {
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at top, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.98));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            font-size: 12px;
-            color: var(--text-soft);
-            backdrop-filter: blur(2px);
-            z-index: 5;
-        }
-
-        .disabled-overlay span {
-            max-width: 260px;
-            line-height: 1.4;
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 2px 7px;
-            border-radius: 999px;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            border: 1px solid rgba(148, 163, 184, 0.5);
-            background: rgba(15, 23, 42, 0.9);
-        }
-
-        .badge-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 999px;
-            background: var(--accent);
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.4);
-        }
-
-        .subtext {
-            font-size: 11px;
-            color: var(--text-soft);
-            margin-top: 6px;
-        }
-
-        .subtext strong {
-            color: #e5e7eb;
-            font-weight: 500;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calculadora de Precio Medio Ponderado</title>
+  <style>
+    :root{
+      --bg:#0b1224;
+      --card:#0f172a;
+      --card2:#0b132a;
+      --accent:#38bdf8;
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --border:rgba(148,163,184,.22);
+      --shadow:0 18px 45px rgba(0,0,0,.45);
+      --r-lg:18px;
+      --r-xl:24px;
+    }
+    *{box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{
+      margin:0;
+      padding:18px 14px;
+      min-height:100vh;
+      color:var(--text);
+      background:radial-gradient(circle at top, #1f2937 0, #020617 45%, #000 100%);
+      display:flex;
+      justify-content:center;
+    }
+    .app{
+      width:100%;
+      max-width:720px;
+      background:linear-gradient(135deg, rgba(15,23,42,.96), rgba(2,6,23,.98));
+      border:1px solid rgba(148,163,184,.2);
+      border-radius:28px;
+      box-shadow:var(--shadow);
+      padding:18px;
+      position:relative;
+      overflow:hidden;
+    }
+    .app::before{
+      content:"";
+      position:absolute; inset:-40%;
+      background:
+        radial-gradient(circle at top left, rgba(56,189,248,.14), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(56,189,248,.16), transparent 60%);
+      opacity:.55;
+      pointer-events:none;
+      z-index:-1;
+    }
+    header{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      align-items:flex-start;
+      margin-bottom:14px;
+    }
+    h1{
+      font-size:18px;
+      margin:0 0 4px 0;
+      display:flex;
+      gap:8px;
+      align-items:center;
+      line-height:1.2;
+    }
+    .logo{
+      width:26px;height:26px;border-radius:999px;
+      display:inline-flex;align-items:center;justify-content:center;
+      background:radial-gradient(circle at 30% 30%, #e0f2fe, #38bdf8);
+      color:#020617;font-weight:800;
+      box-shadow:0 0 0 2px rgba(56,189,248,.25);
+    }
+    header p{margin:0;color:var(--muted);font-size:12px}
+    .tag{
+      display:inline-flex;align-items:center;gap:6px;
+      font-size:11px;color:var(--muted);
+      padding:6px 10px;border-radius:999px;
+      background:rgba(2,6,23,.55);
+      border:1px solid rgba(148,163,184,.28);
+      white-space:nowrap;
+      margin-top:2px;
+    }
+    .dot{width:7px;height:7px;border-radius:999px;background:var(--accent);box-shadow:0 0 0 4px rgba(56,189,248,.25)}
+    .card{
+      background:radial-gradient(circle at top left, rgba(15,23,42,.95), rgba(2,6,23,.95));
+      border:1px solid var(--border);
+      border-radius:var(--r-xl);
+      padding:14px;
+      overflow:hidden;
+      position:relative;
+    }
+    .card + .card{margin-top:12px}
+    .card h2{
+      margin:0 0 10px 0;
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:#dbeafe;
+      opacity:.9;
+    }
+    .inputs{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+    @media (max-width:520px){
+      .inputs{grid-template-columns:1fr}
+      header{flex-direction:column}
+      .tag{align-self:flex-start}
+    }
+    .field{display:flex;flex-direction:column;gap:5px}
+    .field label{
+      display:flex;justify-content:space-between;gap:8px;
+      font-size:11px;text-transform:uppercase;letter-spacing:.06em;
+      color:var(--muted);
+    }
+    .field input[type="number"]{
+      width:100%;
+      padding:9px 10px;
+      border-radius:14px;
+      border:1px solid rgba(55,65,81,.95);
+      background:rgba(2,6,23,.55);
+      color:var(--text);
+      font-size:14px;
+      outline:none;
+    }
+    .field input[type="number"]:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 1px rgba(56,189,248,.65);
+      background:rgba(2,6,23,.72);
+    }
+    .hint{
+      margin-top:10px;
+      font-size:11px;
+      color:var(--muted);
+      line-height:1.35;
+    }
+    .stats{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+      margin-top:12px;
+    }
+    @media (max-width:520px){
+      .stats{grid-template-columns:1fr}
+    }
+    .stat{
+      background:rgba(2,6,23,.55);
+      border:1px solid rgba(148,163,184,.2);
+      border-radius:16px;
+      padding:10px 10px;
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .stat .k{
+      font-size:10px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+    .stat .v{
+      font-weight:700;
+      font-size:15px;
+      line-height:1.1;
+    }
+    .delta{
+      font-size:11px;
+      color:var(--muted);
+    }
+    .delta.good{color:#4ade80}
+    .delta.bad{color:#f97373}
+    .slider-card{
+      background:rgba(2,6,23,.45);
+      border:1px solid rgba(148,163,184,.18);
+      border-radius:18px;
+      padding:10px 10px 12px;
+      position:relative;
+    }
+    .slider-card + .slider-card{margin-top:10px}
+    .slider-head{
+      display:flex;justify-content:space-between;align-items:center;
+      gap:10px;margin-bottom:8px;
+    }
+    .slider-title{
+      display:flex;flex-direction:column;gap:2px;
+    }
+    .slider-title .a{
+      font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)
+    }
+    .slider-title .b{
+      font-size:12px;font-weight:700;color:#e5e7eb
+    }
+    .lock{
+      display:inline-flex;align-items:center;gap:6px;
+      font-size:10px;color:var(--muted);
+      padding:3px 8px;border-radius:999px;
+      border:1px solid rgba(55,65,81,.85);
+      background:rgba(2,6,23,.5);
+      user-select:none;
+    }
+    .lock input{accent-color:var(--accent)}
+    .slider-body{
+      display:grid;
+      grid-template-columns:1fr 110px;
+      gap:10px;
+      align-items:center;
+    }
+    @media (max-width:520px){
+      .slider-body{grid-template-columns:1fr 120px}
+    }
+    input[type="range"]{
+      width:100%;
+      -webkit-appearance:none;
+      appearance:none;
+      background:transparent;
+    }
+    input[type="range"]::-webkit-slider-runnable-track{
+      height:6px;border-radius:999px;
+      background:linear-gradient(90deg, rgba(56,189,248,.18), rgba(56,189,248,.7));
+    }
+    input[type="range"]::-moz-range-track{
+      height:6px;border-radius:999px;
+      background:linear-gradient(90deg, rgba(56,189,248,.18), rgba(56,189,248,.7));
+    }
+    input[type="range"]::-webkit-slider-thumb{
+      -webkit-appearance:none;appearance:none;
+      width:14px;height:14px;border-radius:50%;
+      background:#e5e7eb;border:2px solid #020617;
+      box-shadow:0 0 0 3px rgba(2,6,23,.9), 0 0 0 5px rgba(56,189,248,.65);
+      margin-top:-4px;
+    }
+    input[type="range"]::-moz-range-thumb{
+      width:14px;height:14px;border-radius:50%;
+      background:#e5e7eb;border:2px solid #020617;
+      box-shadow:0 0 0 3px rgba(2,6,23,.9), 0 0 0 5px rgba(56,189,248,.65);
+    }
+    .minmax{
+      display:flex;justify-content:space-between;
+      font-size:10px;color:var(--muted);
+      margin-top:6px;
+    }
+    .num{
+      width:100%;
+      padding:7px 8px;
+      border-radius:12px;
+      border:1px solid rgba(55,65,81,.95);
+      background:rgba(2,6,23,.55);
+      color:var(--text);
+      font-size:13px;
+      text-align:right;
+      outline:none;
+    }
+    .num:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 1px rgba(56,189,248,.6);
+    }
+    .overlay{
+      position:absolute;inset:0;
+      display:flex;align-items:center;justify-content:center;
+      text-align:center;
+      padding:18px;
+      font-size:12px;
+      color:var(--muted);
+      background:radial-gradient(circle at top, rgba(15,23,42,.75), rgba(2,6,23,.94));
+      backdrop-filter: blur(2px);
+      z-index:5;
+    }
+    code{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+      font-size:11px;
+      color:#cbd5e1;
+    }
+  </style>
 </head>
-
 <body>
-    <div class="app">
-        <header>
-            <div>
-                <h1> <span class="logo-pill">μ</span> Calculadora de Precio Medio Ponderado </h1>
-                <p>Juega con cantidad, precio actual y nuevo coste medio bloqueando el parámetro que quieras.</p>
-            </div>
-            <div class="tagline"> <span class="tag-dot"></span> <span>Ajuste dinámico con sliders vinculados</span>
-            </div>
-        </header>
-        <div class="grid"> <!-- Panel de configuración base -->
-            <section class="card">
-                <div class="card-header">
-                    <h2>Posición actual</h2> <span class="pill">Paso 1 · Datos base</span>
-                </div>
-                <div class="inputs-row">
-                    <div class="field"> <label> Quantity en posesión <span class="value-hint" id="baseQtyHint"></span>
-                        </label> <input id="baseQty" type="number" min="0" step="1" placeholder="p.ej. 5000" /> </div>
-                    <div class="field"> <label> Average Cost actual <span class="value-hint" id="avgCostHint"></span>
-                        </label> <input id="avgCost" type="number" min="0" step="0.01" placeholder="p.ej. 93570" />
-                    </div>
-                </div>
-                <div class="hint-row"> <span> <span class="chip">Info</span> Usaremos estos datos para calcular el nuevo
-                        coste medio tras añadir posición. </span> </div>
-                <div class="stats" id="baseStats" style="margin-top:8px;">
-                    <div class="stat"> <span class="label">Coste total actual</span> <span class="value"
-                            id="currentTotalCost">–</span> <span class="delta delta-neutral">Q × AC</span> </div>
-                    <div class="stat"> <span class="label">Cantidad total futura</span> <span class="value"
-                            id="totalQty">–</span> <span class="delta delta-neutral">Q + ΔQ</span> </div>
-                    <div class="stat"> <span class="label">Coste medio futuro</span> <span class="value"
-                            id="futureAvgCost">–</span> <span class="delta" id="avgDeltaLabel">Mueve los sliders…</span>
-                    </div>
-                </div>
-                <p class="subtext"> <strong>Recordatorio:</strong> el nuevo Average Cost es
-                    <code>(Q₀ × AC₀ + ΔQ × P) / (Q₀ + ΔQ)</code>, donde Q₀ es tu quantity actual, AC₀ el coste medio
-                    actual, ΔQ la cantidad adicional y P el precio actual. </p>
-            </section> <!-- Panel de sliders -->
-            <section class="card" style="min-height:260px;">
-                <div id="slidersOverlay" class="disabled-overlay"> <span>Introduce primero <strong>Quantity</strong> y
-                        <strong>Average Cost</strong> para activar los sliders.</span> </div>
-                <div class="card-header">
-                    <h2>Ajuste de escenario</h2> <span class="pill">Paso 2 · Sliders vinculados</span>
-                </div>
-                <div class="hint-row"> <span> <span class="badge"> <span class="badge-dot"></span> Locks </span> Marca
-                        la casilla para fijar un slider. Los demás se adaptarán a él. </span> </div>
-                <div class="sliders"> <!-- Additional Quantity -->
-                    <div class="slider-card" id="sliderQtyCard">
-                        <div class="slider-header">
-                            <div class="slider-title"> <span class="label">Δ Quantity</span> <span
-                                    class="main">Additional Quantity</span> </div> <label class="lock-toggle"> <input
-                                    type="checkbox" id="lockQty" /> Fijar cantidad </label>
-                        </div>
-                        <div class="slider-body">
-                            <div class="slider-row"> <input id="sliderQty" type="range" min="0" max="0" step="1"
-                                    value="0" />
-                                <div class="slider-minmax"> <span id="sliderQtyMinLabel">0</span> <span
-                                        id="sliderQtyMaxLabel">0</span> </div>
-                            </div>
-                            <div class="slider-value"> <input id="inputQty" type="number" min="0" step="1" value="0" />
-                            </div>
-                        </div>
-                    </div> <!-- Current Price -->
-                    <div class="slider-card" id="sliderPriceCard">
-                        <div class="slider-header">
-                            <div class="slider-title"> <span class="label">P actual</span> <span class="main">Current
-                                    Price</span> </div> <label class="lock-toggle"> <input type="checkbox"
-                                    id="lockPrice" /> Fijar precio </label>
-                        </div>
-                        <div class="slider-body">
-                            <div class="slider-row"> <input id="sliderPrice" type="range" min="0" max="0" step="0.01"
-                                    value="0" />
-                                <div class="slider-minmax"> <span id="sliderPriceMinLabel">0</span> <span
-                                        id="sliderPriceMaxLabel">0</span> </div>
-                            </div>
-                            <div class="slider-value"> <input id="inputPrice" type="number" min="0" step="0.01"
-                                    value="0" /> </div>
-                        </div>
-                    </div> <!-- New Average Cost -->
-                    <div class="slider-card" id="sliderAvgCard">
-                        <div class="slider-header">
-                            <div class="slider-title"> <span class="label">AC futuro</span> <span class="main">New
-                                    Average Cost</span> </div> <label class="lock-toggle"> <input type="checkbox"
-                                    id="lockAvg" /> Fijar Avg Cost </label>
-                        </div>
-                        <div class="slider-body">
-                            <div class="slider-row"> <input id="sliderAvg" type="range" min="0" max="0" step="0.01"
-                                    value="0" />
-                                <div class="slider-minmax"> <span id="sliderAvgMinLabel">0</span> <span
-                                        id="sliderAvgMaxLabel">0</span> </div>
-                            </div>
-                            <div class="slider-value"> <input id="inputAvg" type="number" min="0" step="0.01"
-                                    value="0" /> </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+  <div class="app">
+    <header>
+      <div>
+        <h1><span class="logo">μ</span> Precio medio ponderado</h1>
+        <p>Introduce tu posición base y juega con ΔQ, P y el nuevo Avg Cost bloqueando lo que quieras.</p>
+      </div>
+      <div class="tag"><span class="dot"></span> Sliders vinculados · límites fijos</div>
+    </header>
+
+    <!-- Inputs arriba -->
+    <section class="card">
+      <h2>Posición base</h2>
+      <div class="inputs">
+        <div class="field">
+          <label>Quantity <span id="baseQtyHint"></span></label>
+          <input id="baseQty" type="number" min="0" step="1" placeholder="p.ej. 5000" />
         </div>
-    </div>
-    <script>
-  const state = {
-    baseQty: 0,
-    avgCost: 0,
-    additionalQty: 0,
-    currentPrice: 0,
-    newAvgCost: 0,
-    locks: {
-      qty: false,
-      price: false,
-      avg: false,
-    },
-    ranges: {
-      qty: { min: 0, max: 0 },
-      price: { min: 0, max: 0 },
-      avg: { min: 0, max: 0 },
-    },
-    initialized: false,
-  };
+        <div class="field">
+          <label>Average Cost <span id="avgCostHint"></span></label>
+          <input id="avgCost" type="number" min="0" step="0.01" placeholder="p.ej. 93570" />
+        </div>
+      </div>
 
-  const QTY_FACTOR = 5; // ΔQ max = 5 × Q0
+      <div class="hint">
+        Fórmula: <code>(Q₀×AC₀ + ΔQ×P) / (Q₀ + ΔQ)</code>
+        <br/>
+        Los <strong>límites</strong> se calculan una vez al introducir Q₀ y AC₀, y no se vuelven a tocar salvo que cambies estos inputs.
+      </div>
 
-  /* Utilidades numéricas */
-  function toNumber(value) {
-    const n = parseFloat(value);
-    return isNaN(n) ? 0 : n;
-  }
+      <div class="stats">
+        <div class="stat">
+          <div class="k">Cantidad total futura</div>
+          <div class="v" id="totalQty">–</div>
+          <div class="delta">Q₀ + ΔQ</div>
+        </div>
+        <div class="stat">
+          <div class="k">Coste medio futuro</div>
+          <div class="v" id="futureAvgCost">–</div>
+          <div class="delta" id="avgDeltaLabel">Mueve los sliders…</div>
+        </div>
+      </div>
+    </section>
 
-  function clamp(value, min, max) {
-    return Math.min(max, Math.max(min, value));
-  }
+    <!-- Sliders abajo -->
+    <section class="card" style="position:relative;">
+      <div id="slidersOverlay" class="overlay">
+        Introduce primero <strong>Quantity</strong> y <strong>Average Cost</strong> para activar los sliders.
+      </div>
 
-  function nearlyEqual(a, b, eps = 1e-9) {
-    return Math.abs(a - b) <= eps;
-  }
+      <h2>Escenario</h2>
 
-  function formatNumber(value, decimals = 2) {
-    if (!isFinite(value)) return "–";
-    const opts = {
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
+      <!-- ΔQ -->
+      <div class="slider-card">
+        <div class="slider-head">
+          <div class="slider-title">
+            <div class="a">Δ Quantity</div>
+            <div class="b">Additional Quantity</div>
+          </div>
+          <label class="lock"><input id="lockQty" type="checkbox" /> Fijar</label>
+        </div>
+
+        <div class="slider-body">
+          <div>
+            <input id="sliderQty" type="range" min="0" max="0" step="1" value="0" />
+            <div class="minmax">
+              <span id="sliderQtyMinLabel">0</span>
+              <span id="sliderQtyMaxLabel">0</span>
+            </div>
+          </div>
+          <input id="inputQty" class="num" type="number" min="0" step="1" value="0" />
+        </div>
+      </div>
+
+      <!-- P -->
+      <div class="slider-card">
+        <div class="slider-head">
+          <div class="slider-title">
+            <div class="a">P actual</div>
+            <div class="b">Current Price</div>
+          </div>
+          <label class="lock"><input id="lockPrice" type="checkbox" /> Fijar</label>
+        </div>
+
+        <div class="slider-body">
+          <div>
+            <input id="sliderPrice" type="range" min="0" max="0" step="0.01" value="0" />
+            <div class="minmax">
+              <span id="sliderPriceMinLabel">0</span>
+              <span id="sliderPriceMaxLabel">0</span>
+            </div>
+          </div>
+          <input id="inputPrice" class="num" type="number" min="0" step="0.01" value="0" />
+        </div>
+      </div>
+
+      <!-- New Avg -->
+      <div class="slider-card">
+        <div class="slider-head">
+          <div class="slider-title">
+            <div class="a">AC futuro</div>
+            <div class="b">New Average Cost</div>
+          </div>
+          <label class="lock"><input id="lockAvg" type="checkbox" /> Fijar</label>
+        </div>
+
+        <div class="slider-body">
+          <div>
+            <input id="sliderAvg" type="range" min="0" max="0" step="0.01" value="0" />
+            <div class="minmax">
+              <span id="sliderAvgMinLabel">0</span>
+              <span id="sliderAvgMaxLabel">0</span>
+            </div>
+          </div>
+          <input id="inputAvg" class="num" type="number" min="0" step="0.01" value="0" />
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const state = {
+      baseQty: 0,
+      avgCost: 0,
+
+      additionalQty: 0,
+      currentPrice: 0,
+      newAvgCost: 0,
+
+      locks: { qty: false, price: false, avg: false },
+
+      // ranges “congelados” (solo cambian al editar inputs base)
+      ranges: {
+        qty:  { min: 0, max: 0 },
+        price:{ min: 0, max: 0 },
+        avg:  { min: 0, max: 0 },
+      },
+
+      initialized: false,
     };
-    return value.toLocaleString("es-ES", opts);
-  }
 
-  function computeAvgCost(Q0, AC0, dq, P) {
-    if (Q0 + dq <= 0) return AC0;
-    const cost0 = Q0 * AC0;
-    const cost1 = cost0 + dq * P;
-    return cost1 / (Q0 + dq);
-  }
+    const QTY_FACTOR = 5;
 
-  // Resolver ΔQ dado target NewAvg y precio P
-  // NewAvg = (Q0*AC0 + dq*P)/(Q0+dq)
-  // => dq = Q0*(AC0 - NewAvg)/(NewAvg - P)
-  function solveDQ(Q0, AC0, P, targetAvg) {
-    const denom = (targetAvg - P);
-    if (Math.abs(denom) < 1e-12) return null; // no resoluble (infinito o indefinido)
-    const dq = Q0 * (AC0 - targetAvg) / denom;
-    return dq;
-  }
+    function toNumber(v){ const n = parseFloat(v); return isNaN(n) ? 0 : n; }
+    function clamp(v,min,max){ return Math.min(max, Math.max(min, v)); }
 
-  // Resolver P dado target NewAvg y dq
-  // targetAvg*(Q0+dq) = Q0*AC0 + dq*P
-  // => P = (targetAvg*(Q0+dq) - Q0*AC0)/dq
-  function solveP(Q0, AC0, dq, targetAvg) {
-    if (Math.abs(dq) < 1e-12) return null;
-    const P = (targetAvg * (Q0 + dq) - (Q0 * AC0)) / dq;
-    return P;
-  }
+    function formatNumber(value, decimals = 2) {
+      if (!isFinite(value)) return "–";
+      return value.toLocaleString("es-ES", {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      });
+    }
 
-  /* DOM refs */
-  const baseQtyInput = document.getElementById("baseQty");
-  const avgCostInput = document.getElementById("avgCost");
-  const baseQtyHint = document.getElementById("baseQtyHint");
-  const avgCostHint = document.getElementById("avgCostHint");
+    function computeAvgCost(Q0, AC0, dq, P) {
+      if (Q0 + dq <= 0) return AC0;
+      return (Q0 * AC0 + dq * P) / (Q0 + dq);
+    }
 
-  const currentTotalCostEl = document.getElementById("currentTotalCost");
-  const totalQtyEl = document.getElementById("totalQty");
-  const futureAvgCostEl = document.getElementById("futureAvgCost");
-  const avgDeltaLabel = document.getElementById("avgDeltaLabel");
+    // dq = Q0*(AC0 - targetAvg)/(targetAvg - P)
+    function solveDQ(Q0, AC0, P, targetAvg) {
+      const denom = (targetAvg - P);
+      if (Math.abs(denom) < 1e-12) return null;
+      return Q0 * (AC0 - targetAvg) / denom;
+    }
 
-  const slidersOverlay = document.getElementById("slidersOverlay");
+    // P = (targetAvg*(Q0+dq) - Q0*AC0)/dq
+    function solveP(Q0, AC0, dq, targetAvg) {
+      if (Math.abs(dq) < 1e-12) return null;
+      return (targetAvg * (Q0 + dq) - (Q0 * AC0)) / dq;
+    }
 
-  const sliderQty = document.getElementById("sliderQty");
-  const inputQty = document.getElementById("inputQty");
-  const sliderQtyMinLabel = document.getElementById("sliderQtyMinLabel");
-  const sliderQtyMaxLabel = document.getElementById("sliderQtyMaxLabel");
+    // DOM
+    const baseQtyInput = document.getElementById("baseQty");
+    const avgCostInput = document.getElementById("avgCost");
+    const baseQtyHint = document.getElementById("baseQtyHint");
+    const avgCostHint = document.getElementById("avgCostHint");
 
-  const sliderPrice = document.getElementById("sliderPrice");
-  const inputPrice = document.getElementById("inputPrice");
-  const sliderPriceMinLabel = document.getElementById("sliderPriceMinLabel");
-  const sliderPriceMaxLabel = document.getElementById("sliderPriceMaxLabel");
+    const totalQtyEl = document.getElementById("totalQty");
+    const futureAvgCostEl = document.getElementById("futureAvgCost");
+    const avgDeltaLabel = document.getElementById("avgDeltaLabel");
+    const overlay = document.getElementById("slidersOverlay");
 
-  const sliderAvg = document.getElementById("sliderAvg");
-  const inputAvg = document.getElementById("inputAvg");
-  const sliderAvgMinLabel = document.getElementById("sliderAvgMinLabel");
-  const sliderAvgMaxLabel = document.getElementById("sliderAvgMaxLabel");
+    const sliderQty = document.getElementById("sliderQty");
+    const inputQty  = document.getElementById("inputQty");
+    const qtyMinLbl = document.getElementById("sliderQtyMinLabel");
+    const qtyMaxLbl = document.getElementById("sliderQtyMaxLabel");
 
-  const lockQty = document.getElementById("lockQty");
-  const lockPrice = document.getElementById("lockPrice");
-  const lockAvg = document.getElementById("lockAvg");
+    const sliderPrice = document.getElementById("sliderPrice");
+    const inputPrice  = document.getElementById("inputPrice");
+    const priceMinLbl = document.getElementById("sliderPriceMinLabel");
+    const priceMaxLbl = document.getElementById("sliderPriceMaxLabel");
 
-  /* Rango para el Average Cost posible dado los límites de ΔQ y P */
-  function recomputeAvgRange() {
-    const Q0 = state.baseQty;
-    const AC0 = state.avgCost;
-    const qMax = state.ranges.qty.max;
-    const Pmin = state.ranges.price.min;
-    const Pmax = state.ranges.price.max;
+    const sliderAvg = document.getElementById("sliderAvg");
+    const inputAvg  = document.getElementById("inputAvg");
+    const avgMinLbl = document.getElementById("sliderAvgMinLabel");
+    const avgMaxLbl = document.getElementById("sliderAvgMaxLabel");
 
-    const values = [];
-    if (Q0 > 0) {
-      values.push(AC0); // dq=0 -> AC1 = AC0
-      if (qMax > 0) {
-        values.push(
-          computeAvgCost(Q0, AC0, qMax, Pmin),
-          computeAvgCost(Q0, AC0, qMax, Pmax)
-        );
+    const lockQty = document.getElementById("lockQty");
+    const lockPrice = document.getElementById("lockPrice");
+    const lockAvg = document.getElementById("lockAvg");
+
+    function baseIsValid(){
+      return state.baseQty > 0 && state.avgCost > 0;
+    }
+
+    function setOverlayEnabled(enabled){
+      overlay.style.display = enabled ? "none" : "flex";
+    }
+
+    // Calcula rango posible de Avg usando extremos (dq max y P min/max) + dq=0 => AC0
+    function computeFrozenAvgRange(Q0, AC0, dqMax, Pmin, Pmax){
+      const candidates = [AC0];
+      if (dqMax > 0) {
+        candidates.push(computeAvgCost(Q0, AC0, dqMax, Pmin));
+        candidates.push(computeAvgCost(Q0, AC0, dqMax, Pmax));
       }
+      let mn = Math.min(...candidates);
+      let mx = Math.max(...candidates);
+      if (mn === mx) { mn = AC0 * 0.9; mx = AC0 * 1.1; }
+      return { min: Math.max(0, mn), max: mx };
     }
 
-    let min = AC0;
-    let max = AC0;
-    if (values.length) {
-      min = Math.min(...values);
-      max = Math.max(...values);
+    // SOLO se llama al cambiar inputs base (Q0 / AC0)
+    function freezeAllRangesFromBase(){
+      const Q0 = state.baseQty;
+      const AC0 = state.avgCost;
+
+      // ΔQ range fijo
+      state.ranges.qty.min = 0;
+      state.ranges.qty.max = Q0 * QTY_FACTOR;
+
+      // Precio range fijo en base a AC0 (no a slider)
+      state.ranges.price.min = Math.max(0, AC0 * 0.5);
+      state.ranges.price.max = AC0 * 1.5;
+
+      // Avg range fijo
+      const avgRange = computeFrozenAvgRange(
+        Q0, AC0,
+        state.ranges.qty.max,
+        state.ranges.price.min,
+        state.ranges.price.max
+      );
+      state.ranges.avg.min = avgRange.min;
+      state.ranges.avg.max = avgRange.max;
+
+      // Aplicar a inputs range (NO volver a tocar salvo base)
+      sliderQty.min = state.ranges.qty.min;
+      sliderQty.max = state.ranges.qty.max;
+      qtyMinLbl.textContent = formatNumber(state.ranges.qty.min, 0);
+      qtyMaxLbl.textContent = formatNumber(state.ranges.qty.max, 0);
+
+      sliderPrice.min = state.ranges.price.min;
+      sliderPrice.max = state.ranges.price.max;
+      priceMinLbl.textContent = formatNumber(state.ranges.price.min, 2);
+      priceMaxLbl.textContent = formatNumber(state.ranges.price.max, 2);
+
+      sliderAvg.min = state.ranges.avg.min;
+      sliderAvg.max = state.ranges.avg.max;
+      avgMinLbl.textContent = formatNumber(state.ranges.avg.min, 2);
+      avgMaxLbl.textContent = formatNumber(state.ranges.avg.max, 2);
     }
 
-    if (min === max) {
-      min = AC0 * 0.9;
-      max = AC0 * 1.1;
-    }
+    function updateStats(){
+      const Q0 = state.baseQty;
+      const AC0 = state.avgCost;
+      const dq = state.additionalQty;
+      const totalQ = Q0 + dq;
 
-    state.ranges.avg.min = Math.max(0, min);
-    state.ranges.avg.max = max;
+      totalQtyEl.textContent = baseIsValid() ? formatNumber(totalQ, 0) : "–";
 
-    sliderAvg.min = state.ranges.avg.min;
-    sliderAvg.max = state.ranges.avg.max;
-    sliderAvgMinLabel.textContent = formatNumber(state.ranges.avg.min);
-    sliderAvgMaxLabel.textContent = formatNumber(state.ranges.avg.max);
-  }
+      const newAC = computeAvgCost(Q0, AC0, dq, state.currentPrice);
+      futureAvgCostEl.textContent = baseIsValid() ? formatNumber(newAC, 2) : "–";
 
-  function updateRangesAfterInit() {
-    const Q0 = state.baseQty;
-    const AC0 = state.avgCost;
-    if (Q0 <= 0 || AC0 <= 0) return;
-
-    // ΔQ: 0 -> QTY_FACTOR × Q0
-    state.ranges.qty.min = 0;
-    state.ranges.qty.max = Q0 * QTY_FACTOR;
-
-    sliderQty.min = state.ranges.qty.min;
-    sliderQty.max = state.ranges.qty.max;
-    sliderQtyMinLabel.textContent = formatNumber(state.ranges.qty.min, 0);
-    sliderQtyMaxLabel.textContent = formatNumber(state.ranges.qty.max, 0);
-
-    // Precio: 50% -> 150% del precio de referencia (por defecto AC0)
-    const Pref = state.currentPrice || AC0;
-    state.ranges.price.min = Math.max(0, Pref * 0.5);
-    state.ranges.price.max = Pref * 1.5;
-
-    sliderPrice.min = state.ranges.price.min;
-    sliderPrice.max = state.ranges.price.max;
-    sliderPriceMinLabel.textContent = formatNumber(state.ranges.price.min);
-    sliderPriceMaxLabel.textContent = formatNumber(state.ranges.price.max);
-
-    recomputeAvgRange();
-  }
-
-  function updateBaseStats() {
-    const Q0 = state.baseQty;
-    const AC0 = state.avgCost;
-    const dq = state.additionalQty;
-    const P = state.currentPrice;
-    const newAC = computeAvgCost(Q0, AC0, dq, P);
-
-    const currentCost = Q0 * AC0;
-    const totalQty = Q0 + dq;
-
-    currentTotalCostEl.textContent = Q0 > 0 ? formatNumber(currentCost, 2) : "–";
-    totalQtyEl.textContent = totalQty > 0 ? formatNumber(totalQty, 0) : "–";
-    futureAvgCostEl.textContent = totalQty > 0 ? formatNumber(newAC, 2) : "–";
-
-    const delta = newAC - AC0;
-    if (!isFinite(delta) || Q0 <= 0) {
-      avgDeltaLabel.textContent = "Mueve los sliders…";
-      avgDeltaLabel.className = "delta delta-neutral";
-      return;
-    }
-
-    if (Math.abs(delta) < 1e-6) {
-      avgDeltaLabel.textContent = "Sin cambio en el coste medio";
-      avgDeltaLabel.className = "delta delta-neutral";
-    } else if (delta < 0) {
-      avgDeltaLabel.textContent = "Mejora el coste medio en " + formatNumber(-delta, 2);
-      avgDeltaLabel.className = "delta delta-better";
-    } else {
-      avgDeltaLabel.textContent = "Empeora el coste medio en " + formatNumber(delta, 2);
-      avgDeltaLabel.className = "delta delta-worse";
-    }
-  }
-
-  function syncUIFromState() {
-    // Qty
-    state.additionalQty = clamp(state.additionalQty, state.ranges.qty.min, state.ranges.qty.max);
-    sliderQty.value = String(state.additionalQty);
-    inputQty.value = String(Math.round(state.additionalQty));
-
-    // Price
-    state.currentPrice = clamp(state.currentPrice, state.ranges.price.min, state.ranges.price.max);
-    sliderPrice.value = String(state.currentPrice);
-    inputPrice.value = state.currentPrice.toFixed(2);
-
-    // Avg
-    state.newAvgCost = clamp(state.newAvgCost, state.ranges.avg.min, state.ranges.avg.max);
-    sliderAvg.value = String(state.newAvgCost);
-    inputAvg.value = state.newAvgCost.toFixed(2);
-
-    // Locks UI
-    lockQty.checked = !!state.locks.qty;
-    lockPrice.checked = !!state.locks.price;
-    lockAvg.checked = !!state.locks.avg;
-
-    updateBaseStats();
-  }
-
-  function setOverlay(enabled) {
-    slidersOverlay.style.display = enabled ? "none" : "flex";
-  }
-
-  function baseIsValid() {
-    return state.baseQty > 0 && state.avgCost > 0;
-  }
-
-  // Decide cuál variable "libre" ajustar cuando una está lockeada.
-  // Política:
-  // - Si movemos Avg: preferimos ajustar ΔQ si no está lock; si ΔQ lock, ajustamos P.
-  // - Si movemos Price: recalcula Avg si no lock; si Avg lock, ajusta ΔQ.
-  // - Si movemos ΔQ: recalcula Avg si no lock; si Avg lock, ajusta P.
-  function applyFromQty() {
-    const Q0 = state.baseQty;
-    const AC0 = state.avgCost;
-    const dq = state.additionalQty;
-
-    if (!state.locks.avg) {
-      state.newAvgCost = computeAvgCost(Q0, AC0, dq, state.currentPrice);
-      return;
-    }
-
-    // Avg fijo -> ajustar P para cumplir Avg fijo (si no está lockeado)
-    if (!state.locks.price) {
-      const P = solveP(Q0, AC0, dq, state.newAvgCost);
-      if (P != null && isFinite(P)) state.currentPrice = P;
-    }
-    // Si Avg y Price están lock -> no hay grados de libertad, simplemente clamp
-  }
-
-  function applyFromPrice() {
-    const Q0 = state.baseQty;
-    const AC0 = state.avgCost;
-    const P = state.currentPrice;
-
-    if (!state.locks.avg) {
-      state.newAvgCost = computeAvgCost(Q0, AC0, state.additionalQty, P);
-      return;
-    }
-
-    // Avg fijo -> ajustar ΔQ si no está lockeado
-    if (!state.locks.qty) {
-      const dq = solveDQ(Q0, AC0, P, state.newAvgCost);
-      if (dq != null && isFinite(dq)) state.additionalQty = dq;
-    }
-  }
-
-  function applyFromAvg() {
-    const Q0 = state.baseQty;
-    const AC0 = state.avgCost;
-    const target = state.newAvgCost;
-
-    // Preferimos ajustar ΔQ si no está lock; si no, ajustar P
-    if (!state.locks.qty) {
-      const dq = solveDQ(Q0, AC0, state.currentPrice, target);
-      if (dq != null && isFinite(dq)) {
-        state.additionalQty = dq;
+      const delta = newAC - AC0;
+      if (!baseIsValid()) {
+        avgDeltaLabel.textContent = "Mueve los sliders…";
+        avgDeltaLabel.className = "delta";
         return;
       }
-    }
-
-    if (!state.locks.price) {
-      const P = solveP(Q0, AC0, state.additionalQty, target);
-      if (P != null && isFinite(P)) {
-        state.currentPrice = P;
-        return;
+      if (Math.abs(delta) < 1e-6) {
+        avgDeltaLabel.textContent = "Sin cambio en el coste medio";
+        avgDeltaLabel.className = "delta";
+      } else if (delta < 0) {
+        avgDeltaLabel.textContent = "Mejora en " + formatNumber(-delta, 2);
+        avgDeltaLabel.className = "delta good";
+      } else {
+        avgDeltaLabel.textContent = "Empeora en " + formatNumber(delta, 2);
+        avgDeltaLabel.className = "delta bad";
       }
     }
 
-    // Si todo está lock, no podemos hacer nada; clamp al sync.
-  }
+    function syncUI(){
+      // clamp SIEMPRE a rangos congelados
+      state.additionalQty = clamp(state.additionalQty, state.ranges.qty.min, state.ranges.qty.max);
+      state.currentPrice  = clamp(state.currentPrice,  state.ranges.price.min, state.ranges.price.max);
+      state.newAvgCost    = clamp(state.newAvgCost,    state.ranges.avg.min, state.ranges.avg.max);
 
-  // Reajusta ranges cuando editas manualmente Qty/Price/Avg (los inputs numéricos)
-  // - Qty base y AvgCost base reconfiguran todo
-  // - Price manual redefine min/max de Price y también recomputeAvgRange (porque cambia Pmin/Pmax)
-  function hardRecomputeAll() {
-    if (!baseIsValid()) {
-      state.initialized = false;
-      setOverlay(false);
-      return;
+      sliderQty.value = String(state.additionalQty);
+      inputQty.value  = String(Math.round(state.additionalQty));
+
+      sliderPrice.value = String(state.currentPrice);
+      inputPrice.value  = state.currentPrice.toFixed(2);
+
+      sliderAvg.value = String(state.newAvgCost);
+      inputAvg.value  = state.newAvgCost.toFixed(2);
+
+      lockQty.checked = !!state.locks.qty;
+      lockPrice.checked = !!state.locks.price;
+      lockAvg.checked = !!state.locks.avg;
+
+      updateStats();
     }
 
-    state.initialized = true;
-    setOverlay(true);
+    // Motor de relación según “origen”
+    function applyFromQty(){
+      const Q0 = state.baseQty, AC0 = state.avgCost, dq = state.additionalQty;
 
-    // Defaults iniciales
-    if (!state.currentPrice || state.currentPrice <= 0) state.currentPrice = state.avgCost;
-    if (!isFinite(state.additionalQty) || state.additionalQty < 0) state.additionalQty = 0;
+      if (!state.locks.avg) {
+        state.newAvgCost = computeAvgCost(Q0, AC0, dq, state.currentPrice);
+        return;
+      }
+      // Avg fijo => ajustar P si posible y no lock
+      if (!state.locks.price) {
+        const P = solveP(Q0, AC0, dq, state.newAvgCost);
+        if (P != null && isFinite(P)) state.currentPrice = P;
+      }
+    }
 
-    updateRangesAfterInit();
+    function applyFromPrice(){
+      const Q0 = state.baseQty, AC0 = state.avgCost;
 
-    // NewAvg por defecto = AvgCost cuando dq=0
-    if (!state.newAvgCost || state.newAvgCost <= 0) {
+      if (!state.locks.avg) {
+        state.newAvgCost = computeAvgCost(Q0, AC0, state.additionalQty, state.currentPrice);
+        return;
+      }
+      // Avg fijo => ajustar ΔQ si posible y no lock
+      if (!state.locks.qty) {
+        const dq = solveDQ(Q0, AC0, state.currentPrice, state.newAvgCost);
+        if (dq != null && isFinite(dq)) state.additionalQty = dq;
+      }
+    }
+
+    function applyFromAvg(){
+      const Q0 = state.baseQty, AC0 = state.avgCost, target = state.newAvgCost;
+
+      // Preferencia: ajustar ΔQ si libre, si no P
+      if (!state.locks.qty) {
+        const dq = solveDQ(Q0, AC0, state.currentPrice, target);
+        if (dq != null && isFinite(dq)) {
+          state.additionalQty = dq;
+          return;
+        }
+      }
+      if (!state.locks.price) {
+        const P = solveP(Q0, AC0, state.additionalQty, target);
+        if (P != null && isFinite(P)) {
+          state.currentPrice = P;
+          return;
+        }
+      }
+    }
+
+    function initIfPossible(){
+      if (!baseIsValid()) {
+        state.initialized = false;
+        setOverlayEnabled(false);
+        syncUI();
+        return;
+      }
+
+      state.initialized = true;
+      setOverlayEnabled(true);
+
+      // Congelar rangos en base a inputs base
+      freezeAllRangesFromBase();
+
+      // Defaults (coherentes)
+      state.additionalQty = 0;
+      state.currentPrice = state.avgCost;
       state.newAvgCost = state.avgCost;
+
+      syncUI();
     }
 
-    // Aplicar coherencia según locks:
-    // Si Avg no está lock, lo recalculamos desde (dq, P)
-    if (!state.locks.avg) {
-      state.newAvgCost = computeAvgCost(state.baseQty, state.avgCost, state.additionalQty, state.currentPrice);
-    } else {
-      // Si Avg lock, intentamos ajustar el que esté libre
+    // Events base
+    function onBaseChange(){
+      state.baseQty = Math.max(0, Math.floor(toNumber(baseQtyInput.value)));
+      state.avgCost = Math.max(0, toNumber(avgCostInput.value));
+
+      baseQtyHint.textContent = state.baseQty ? formatNumber(state.baseQty, 0) : "";
+      avgCostHint.textContent = state.avgCost ? formatNumber(state.avgCost, 2) : "";
+
+      initIfPossible();
+    }
+
+    // Slider events (NO recalcular rangos)
+    function onQtyChange(v){
+      if (!state.initialized) return;
+      state.additionalQty = toNumber(v);
+      applyFromQty();
+      syncUI();
+    }
+    function onPriceChange(v){
+      if (!state.initialized) return;
+      state.currentPrice = toNumber(v);
+      applyFromPrice();
+      syncUI();
+    }
+    function onAvgChange(v){
+      if (!state.initialized) return;
+      state.newAvgCost = toNumber(v);
       applyFromAvg();
+      syncUI();
     }
 
-    recomputeAvgRange();
-    syncUIFromState();
-  }
+    function onLockToggle(){
+      state.locks.qty = lockQty.checked;
+      state.locks.price = lockPrice.checked;
+      state.locks.avg = lockAvg.checked;
 
-  /* Handlers base inputs */
-  function onBaseInputsChange() {
-    state.baseQty = Math.max(0, Math.floor(toNumber(baseQtyInput.value)));
-    state.avgCost = Math.max(0, toNumber(avgCostInput.value));
+      // si lockeas Avg, proyecta coherencia
+      if (state.initialized && state.locks.avg) applyFromAvg();
+      syncUI();
+    }
 
-    baseQtyHint.textContent = state.baseQty ? formatNumber(state.baseQty, 0) : "";
-    avgCostHint.textContent = state.avgCost ? formatNumber(state.avgCost, 2) : "";
+    // Wire
+    baseQtyInput.addEventListener("input", onBaseChange);
+    avgCostInput.addEventListener("input", onBaseChange);
 
-    // Si base cambia, reseteamos coherentemente: P = AC0, dq=0, newAvg=AC0 (salvo locks, pero aquí mejor reset suave)
-    state.currentPrice = state.avgCost || 0;
-    state.additionalQty = 0;
-    state.newAvgCost = state.avgCost || 0;
+    sliderQty.addEventListener("input", (e)=>onQtyChange(e.target.value));
+    sliderPrice.addEventListener("input", (e)=>onPriceChange(e.target.value));
+    sliderAvg.addEventListener("input", (e)=>onAvgChange(e.target.value));
 
-    hardRecomputeAll();
-  }
+    inputQty.addEventListener("input", (e)=>{
+      if (!state.initialized) return;
+      const v = Math.max(0, Math.floor(toNumber(e.target.value)));
+      state.additionalQty = clamp(v, state.ranges.qty.min, state.ranges.qty.max);
+      applyFromQty();
+      syncUI();
+    });
 
-  /* Handlers sliders + inputs */
-  function onQtyChange(value) {
-    state.additionalQty = toNumber(value);
-    applyFromQty();
-    recomputeAvgRange();
-    syncUIFromState();
-  }
+    inputPrice.addEventListener("input", (e)=>{
+      if (!state.initialized) return;
+      const v = Math.max(0, toNumber(e.target.value));
+      state.currentPrice = clamp(v, state.ranges.price.min, state.ranges.price.max);
+      applyFromPrice();
+      syncUI();
+    });
 
-  function onPriceChange(value) {
-    state.currentPrice = toNumber(value);
+    inputAvg.addEventListener("input", (e)=>{
+      if (!state.initialized) return;
+      const v = Math.max(0, toNumber(e.target.value));
+      state.newAvgCost = clamp(v, state.ranges.avg.min, state.ranges.avg.max);
+      applyFromAvg();
+      syncUI();
+    });
 
-    // Si el usuario cambia el precio manualmente, los límites deben recalcularse con ese Pref
-    // (la lógica ya usa state.currentPrice como referencia).
-    updateRangesAfterInit();
+    lockQty.addEventListener("change", onLockToggle);
+    lockPrice.addEventListener("change", onLockToggle);
+    lockAvg.addEventListener("change", onLockToggle);
 
-    applyFromPrice();
-    recomputeAvgRange();
-    syncUIFromState();
-  }
-
-  function onAvgChange(value) {
-    state.newAvgCost = toNumber(value);
-    applyFromAvg();
-    recomputeAvgRange();
-    syncUIFromState();
-  }
-
-  function onLockToggle() {
-    state.locks.qty = lockQty.checked;
-    state.locks.price = lockPrice.checked;
-    state.locks.avg = lockAvg.checked;
-
-    // Evitar estados imposibles: si están los 3 lock, permitimos pero no habrá ajuste automático.
-    // Si se lockea Avg, intentamos "proyectar" coherencia (ajustar variable libre)
-    if (state.locks.avg) applyFromAvg();
-
-    recomputeAvgRange();
-    syncUIFromState();
-  }
-
-  /* Wiring eventos */
-  baseQtyInput.addEventListener("input", onBaseInputsChange);
-  avgCostInput.addEventListener("input", onBaseInputsChange);
-
-  sliderQty.addEventListener("input", (e) => onQtyChange(e.target.value));
-  sliderPrice.addEventListener("input", (e) => onPriceChange(e.target.value));
-  sliderAvg.addEventListener("input", (e) => onAvgChange(e.target.value));
-
-  inputQty.addEventListener("input", (e) => {
-    const v = Math.max(0, Math.floor(toNumber(e.target.value)));
-    // Si editas manual ΔQ, NO cambiamos su rango (viene de Q0), pero clamp y aplicar.
-    onQtyChange(clamp(v, state.ranges.qty.min, state.ranges.qty.max));
-  });
-
-  inputPrice.addEventListener("input", (e) => {
-    const v = Math.max(0, toNumber(e.target.value));
-    // Price manual reajusta sus límites alrededor del propio precio (0.5x..1.5x)
-    state.currentPrice = v;
-    updateRangesAfterInit();
-    onPriceChange(clamp(v, state.ranges.price.min, state.ranges.price.max));
-  });
-
-  inputAvg.addEventListener("input", (e) => {
-    const v = Math.max(0, toNumber(e.target.value));
-    onAvgChange(clamp(v, state.ranges.avg.min, state.ranges.avg.max));
-  });
-
-  lockQty.addEventListener("change", onLockToggle);
-  lockPrice.addEventListener("change", onLockToggle);
-  lockAvg.addEventListener("change", onLockToggle);
-
-  /* Estado inicial */
-  setOverlay(false);
-  syncUIFromState();
-</script>
+    // Init UI
+    setOverlayEnabled(false);
+    syncUI();
+  </script>
+</body>
+</html>

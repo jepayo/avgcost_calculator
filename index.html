@@ -8,15 +8,20 @@
     :root{
       --bg:#0b1224;
       --card:#0f172a;
-      --card2:#0b132a;
       --accent:#38bdf8;
       --text:#e5e7eb;
       --muted:#9ca3af;
       --border:rgba(148,163,184,.22);
       --shadow:0 18px 45px rgba(0,0,0,.45);
-      --r-lg:18px;
       --r-xl:24px;
+
+      /* banda pintada en track */
+      --track-base-a: rgba(56,189,248,.14);
+      --track-base-b: rgba(56,189,248,.65);
+      --band: rgba(56,189,248,.28);
+      --band2: rgba(56,189,248,.50);
     }
+
     *{box-sizing:border-box;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
     body{
       margin:0;
@@ -164,12 +169,10 @@
       font-size:15px;
       line-height:1.1;
     }
-    .delta{
-      font-size:11px;
-      color:var(--muted);
-    }
+    .delta{font-size:11px;color:var(--muted)}
     .delta.good{color:#4ade80}
     .delta.bad{color:#f97373}
+
     .slider-card{
       background:rgba(2,6,23,.45);
       border:1px solid rgba(148,163,184,.18);
@@ -178,19 +181,14 @@
       position:relative;
     }
     .slider-card + .slider-card{margin-top:10px}
+
     .slider-head{
       display:flex;justify-content:space-between;align-items:center;
       gap:10px;margin-bottom:8px;
     }
-    .slider-title{
-      display:flex;flex-direction:column;gap:2px;
-    }
-    .slider-title .a{
-      font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)
-    }
-    .slider-title .b{
-      font-size:12px;font-weight:700;color:#e5e7eb
-    }
+    .slider-title{display:flex;flex-direction:column;gap:2px}
+    .slider-title .a{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+    .slider-title .b{font-size:12px;font-weight:700;color:#e5e7eb}
     .lock{
       display:inline-flex;align-items:center;gap:6px;
       font-size:10px;color:var(--muted);
@@ -200,29 +198,86 @@
       user-select:none;
     }
     .lock input{accent-color:var(--accent)}
+
+    /* Layout: [-] [range] [+] [num] */
     .slider-body{
       display:grid;
-      grid-template-columns:1fr 110px;
+      grid-template-columns:34px 1fr 34px 120px;
       gap:10px;
       align-items:center;
     }
     @media (max-width:520px){
-      .slider-body{grid-template-columns:1fr 120px}
+      .slider-body{grid-template-columns:34px 1fr 34px 120px}
     }
+
+    .btn{
+      width:34px;height:34px;
+      border-radius:12px;
+      border:1px solid rgba(55,65,81,.95);
+      background:rgba(2,6,23,.55);
+      color:var(--text);
+      font-weight:800;
+      font-size:16px;
+      line-height:1;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      user-select:none;
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn:focus{outline:none; box-shadow:0 0 0 1px rgba(56,189,248,.6)}
+
+    .range-wrap{display:flex;flex-direction:column;gap:6px}
+
     input[type="range"]{
       width:100%;
       -webkit-appearance:none;
       appearance:none;
       background:transparent;
+      /* CSS vars for band in percent (0..100) */
+      --band-start: 0%;
+      --band-end: 0%;
     }
+
+    /* Track with band overlay */
     input[type="range"]::-webkit-slider-runnable-track{
       height:6px;border-radius:999px;
-      background:linear-gradient(90deg, rgba(56,189,248,.18), rgba(56,189,248,.7));
+      background:
+        linear-gradient(90deg,
+          var(--track-base-a) 0%,
+          var(--track-base-b) 100%);
+      position:relative;
     }
+    input[type="range"].band::-webkit-slider-runnable-track{
+      background:
+        linear-gradient(90deg,
+          rgba(56,189,248,.14) 0%,
+          rgba(56,189,248,.35) var(--band-start),
+          rgba(56,189,248,.55) var(--band-start),
+          rgba(56,189,248,.55) var(--band-end),
+          rgba(56,189,248,.35) var(--band-end),
+          rgba(56,189,248,.14) 100%);
+    }
+
     input[type="range"]::-moz-range-track{
       height:6px;border-radius:999px;
-      background:linear-gradient(90deg, rgba(56,189,248,.18), rgba(56,189,248,.7));
+      background:
+        linear-gradient(90deg,
+          rgba(56,189,248,.14) 0%,
+          rgba(56,189,248,.65) 100%);
     }
+    input[type="range"].band::-moz-range-track{
+      background:
+        linear-gradient(90deg,
+          rgba(56,189,248,.14) 0%,
+          rgba(56,189,248,.35) var(--band-start),
+          rgba(56,189,248,.55) var(--band-start),
+          rgba(56,189,248,.55) var(--band-end),
+          rgba(56,189,248,.35) var(--band-end),
+          rgba(56,189,248,.14) 100%);
+    }
+
     input[type="range"]::-webkit-slider-thumb{
       -webkit-appearance:none;appearance:none;
       width:14px;height:14px;border-radius:50%;
@@ -235,11 +290,13 @@
       background:#e5e7eb;border:2px solid #020617;
       box-shadow:0 0 0 3px rgba(2,6,23,.9), 0 0 0 5px rgba(56,189,248,.65);
     }
+
     .minmax{
       display:flex;justify-content:space-between;
       font-size:10px;color:var(--muted);
-      margin-top:6px;
+      margin-top:0;
     }
+
     .num{
       width:100%;
       padding:7px 8px;
@@ -255,6 +312,7 @@
       border-color:var(--accent);
       box-shadow:0 0 0 1px rgba(56,189,248,.6);
     }
+
     .overlay{
       position:absolute;inset:0;
       display:flex;align-items:center;justify-content:center;
@@ -271,6 +329,12 @@
       font-size:11px;
       color:#cbd5e1;
     }
+    .micro{
+      margin-top:8px;
+      font-size:10px;
+      color:var(--muted);
+      opacity:.95;
+    }
   </style>
 </head>
 <body>
@@ -278,9 +342,9 @@
     <header>
       <div>
         <h1><span class="logo">μ</span> Precio medio ponderado</h1>
-        <p>Introduce tu posición base y juega con ΔQ, P y el nuevo Avg Cost bloqueando lo que quieras.</p>
+        <p>Rangos iniciales ajustados + expansión manual. Bandas indican el recorrido “real” en el contexto actual.</p>
       </div>
-      <div class="tag"><span class="dot"></span> Sliders vinculados · límites fijos</div>
+      <div class="tag"><span class="dot"></span> Rango base + botones ±</div>
     </header>
 
     <!-- Inputs arriba -->
@@ -298,9 +362,8 @@
       </div>
 
       <div class="hint">
-        Fórmula: <code>(Q₀×AC₀ + ΔQ×P) / (Q₀ + ΔQ)</code>
-        <br/>
-        Los <strong>límites</strong> se calculan una vez al introducir Q₀ y AC₀, y no se vuelven a tocar salvo que cambies estos inputs.
+        Fórmula: <code>(Q₀×AC₀ + ΔQ×P) / (Q₀ + ΔQ)</code><br/>
+        Rangos iniciales: <strong>ΔQ=0..(5×Q₀)</strong> y <strong>P=±10%</strong> sobre AC₀. Usa los botones <strong>±</strong> para ampliar rango.
       </div>
 
       <div class="stats">
@@ -315,6 +378,7 @@
           <div class="delta" id="avgDeltaLabel">Mueve los sliders…</div>
         </div>
       </div>
+      <div class="micro" id="rangeInfo">—</div>
     </section>
 
     <!-- Sliders abajo -->
@@ -336,13 +400,18 @@
         </div>
 
         <div class="slider-body">
-          <div>
-            <input id="sliderQty" type="range" min="0" max="0" step="1" value="0" />
+          <button class="btn" id="qtyMinus" title="Reducir rango de cantidad">−</button>
+
+          <div class="range-wrap">
+            <input id="sliderQty" class="band" type="range" min="0" max="0" step="1" value="0" />
             <div class="minmax">
               <span id="sliderQtyMinLabel">0</span>
               <span id="sliderQtyMaxLabel">0</span>
             </div>
           </div>
+
+          <button class="btn" id="qtyPlus" title="Ampliar rango de cantidad">+</button>
+
           <input id="inputQty" class="num" type="number" min="0" step="1" value="0" />
         </div>
       </div>
@@ -358,13 +427,18 @@
         </div>
 
         <div class="slider-body">
-          <div>
-            <input id="sliderPrice" type="range" min="0" max="0" step="0.01" value="0" />
+          <button class="btn" id="priceMinus" title="Reducir rango de precio">−</button>
+
+          <div class="range-wrap">
+            <input id="sliderPrice" class="band" type="range" min="0" max="0" step="0.01" value="0" />
             <div class="minmax">
               <span id="sliderPriceMinLabel">0</span>
               <span id="sliderPriceMaxLabel">0</span>
             </div>
           </div>
+
+          <button class="btn" id="pricePlus" title="Ampliar rango de precio">+</button>
+
           <input id="inputPrice" class="num" type="number" min="0" step="0.01" value="0" />
         </div>
       </div>
@@ -380,13 +454,18 @@
         </div>
 
         <div class="slider-body">
-          <div>
-            <input id="sliderAvg" type="range" min="0" max="0" step="0.01" value="0" />
+          <button class="btn" id="avgMinus" title="Reducir rango de Avg">−</button>
+
+          <div class="range-wrap">
+            <input id="sliderAvg" class="band" type="range" min="0" max="0" step="0.01" value="0" />
             <div class="minmax">
               <span id="sliderAvgMinLabel">0</span>
               <span id="sliderAvgMaxLabel">0</span>
             </div>
           </div>
+
+          <button class="btn" id="avgPlus" title="Ampliar rango de Avg">+</button>
+
           <input id="inputAvg" class="num" type="number" min="0" step="0.01" value="0" />
         </div>
       </div>
@@ -404,20 +483,27 @@
 
       locks: { qty: false, price: false, avg: false },
 
-      // ranges “congelados” (solo cambian al editar inputs base)
+      // Rangos actuales (pueden expandirse con botones ±)
       ranges: {
         qty:  { min: 0, max: 0 },
         price:{ min: 0, max: 0 },
         avg:  { min: 0, max: 0 },
       },
 
+      // Parámetros de rango (para expandir/contraer sin “re-inventar” límites)
+      rangeParams: {
+        qtyFactor: 5,     // empieza en x5
+        pricePct: 0.10,   // empieza ±10%
+        avgPadPct: 0.00,  // padding extra sobre rango calculado (0% al inicio)
+      },
+
       initialized: false,
     };
 
-    const QTY_FACTOR = 5;
-
+    /* Utils */
     function toNumber(v){ const n = parseFloat(v); return isNaN(n) ? 0 : n; }
     function clamp(v,min,max){ return Math.min(max, Math.max(min, v)); }
+    function isFinitePos(v){ return v != null && isFinite(v) && v >= 0; }
 
     function formatNumber(value, decimals = 2) {
       if (!isFinite(value)) return "–";
@@ -445,7 +531,11 @@
       return (targetAvg * (Q0 + dq) - (Q0 * AC0)) / dq;
     }
 
-    // DOM
+    function baseIsValid(){
+      return state.baseQty > 0 && state.avgCost > 0;
+    }
+
+    /* DOM */
     const baseQtyInput = document.getElementById("baseQty");
     const avgCostInput = document.getElementById("avgCost");
     const baseQtyHint = document.getElementById("baseQtyHint");
@@ -455,6 +545,7 @@
     const futureAvgCostEl = document.getElementById("futureAvgCost");
     const avgDeltaLabel = document.getElementById("avgDeltaLabel");
     const overlay = document.getElementById("slidersOverlay");
+    const rangeInfo = document.getElementById("rangeInfo");
 
     const sliderQty = document.getElementById("sliderQty");
     const inputQty  = document.getElementById("inputQty");
@@ -475,16 +566,20 @@
     const lockPrice = document.getElementById("lockPrice");
     const lockAvg = document.getElementById("lockAvg");
 
-    function baseIsValid(){
-      return state.baseQty > 0 && state.avgCost > 0;
-    }
+    const qtyMinus = document.getElementById("qtyMinus");
+    const qtyPlus  = document.getElementById("qtyPlus");
+    const priceMinus = document.getElementById("priceMinus");
+    const pricePlus  = document.getElementById("pricePlus");
+    const avgMinus = document.getElementById("avgMinus");
+    const avgPlus  = document.getElementById("avgPlus");
 
     function setOverlayEnabled(enabled){
       overlay.style.display = enabled ? "none" : "flex";
     }
 
-    // Calcula rango posible de Avg usando extremos (dq max y P min/max) + dq=0 => AC0
-    function computeFrozenAvgRange(Q0, AC0, dqMax, Pmin, Pmax){
+    /* RANGOS */
+    // Rango base “calculado” para Avg (sin padding) usando extremos dqMax y Pmin/Pmax + dq=0
+    function computeCoreAvgRange(Q0, AC0, dqMax, Pmin, Pmax){
       const candidates = [AC0];
       if (dqMax > 0) {
         candidates.push(computeAvgCost(Q0, AC0, dqMax, Pmin));
@@ -496,30 +591,26 @@
       return { min: Math.max(0, mn), max: mx };
     }
 
-    // SOLO se llama al cambiar inputs base (Q0 / AC0)
-    function freezeAllRangesFromBase(){
+    // Recalcula rangos desde inputs base y params de expansión (qtyFactor, pricePct, avgPadPct)
+    function recomputeRangesFromParams(){
       const Q0 = state.baseQty;
       const AC0 = state.avgCost;
+      const { qtyFactor, pricePct, avgPadPct } = state.rangeParams;
 
-      // ΔQ range fijo
       state.ranges.qty.min = 0;
-      state.ranges.qty.max = Q0 * QTY_FACTOR;
+      state.ranges.qty.max = Q0 * qtyFactor;
 
-      // Precio range fijo en base a AC0 (no a slider)
-      state.ranges.price.min = Math.max(0, AC0 * 0.5);
-      state.ranges.price.max = AC0 * 1.5;
+      state.ranges.price.min = Math.max(0, AC0 * (1 - pricePct));
+      state.ranges.price.max = AC0 * (1 + pricePct);
 
-      // Avg range fijo
-      const avgRange = computeFrozenAvgRange(
-        Q0, AC0,
-        state.ranges.qty.max,
-        state.ranges.price.min,
-        state.ranges.price.max
-      );
-      state.ranges.avg.min = avgRange.min;
-      state.ranges.avg.max = avgRange.max;
+      const core = computeCoreAvgRange(Q0, AC0, state.ranges.qty.max, state.ranges.price.min, state.ranges.price.max);
 
-      // Aplicar a inputs range (NO volver a tocar salvo base)
+      // padding extra (simétrico) sobre el core (en unidades de precio, usando AC0)
+      const pad = avgPadPct * AC0;
+      state.ranges.avg.min = Math.max(0, core.min - pad);
+      state.ranges.avg.max = core.max + pad;
+
+      // Aplicar a sliders
       sliderQty.min = state.ranges.qty.min;
       sliderQty.max = state.ranges.qty.max;
       qtyMinLbl.textContent = formatNumber(state.ranges.qty.min, 0);
@@ -534,8 +625,12 @@
       sliderAvg.max = state.ranges.avg.max;
       avgMinLbl.textContent = formatNumber(state.ranges.avg.min, 2);
       avgMaxLbl.textContent = formatNumber(state.ranges.avg.max, 2);
+
+      rangeInfo.textContent =
+        `Rangos: ΔQ max = ${qtyFactor}×Q₀ · Price = ±${Math.round(pricePct*100)}% · Avg padding = +${Math.round(avgPadPct*100)}%`;
     }
 
+    /* STATS */
     function updateStats(){
       const Q0 = state.baseQty;
       const AC0 = state.avgCost;
@@ -565,8 +660,72 @@
       }
     }
 
+    /* BANDAS PINTADAS (zonas) */
+    function setBand(el, min, max, vMin, vMax){
+      if (!isFinite(min) || !isFinite(max) || vMax <= vMin) {
+        el.style.setProperty("--band-start", "0%");
+        el.style.setProperty("--band-end", "0%");
+        return;
+      }
+      const a = clamp((min - vMin) / (vMax - vMin), 0, 1) * 100;
+      const b = clamp((max - vMin) / (vMax - vMin), 0, 1) * 100;
+      const start = Math.min(a,b), end = Math.max(a,b);
+
+      el.style.setProperty("--band-start", start.toFixed(2) + "%");
+      el.style.setProperty("--band-end", end.toFixed(2) + "%");
+    }
+
+    // Recalcula bandas tras cualquier cambio (valores o rangos)
+    function updateBands(){
+      if (!state.initialized) return;
+
+      const Q0 = state.baseQty;
+      const AC0 = state.avgCost;
+
+      // 1) Banda en Avg slider: con P fijo actual, avg alcanzable variando dq en [dqMin..dqMax]
+      const dqMin = state.ranges.qty.min;
+      const dqMax = state.ranges.qty.max;
+      const Pfixed = state.currentPrice;
+
+      const avgA = computeAvgCost(Q0, AC0, dqMin, Pfixed);
+      const avgB = computeAvgCost(Q0, AC0, dqMax, Pfixed);
+      setBand(sliderAvg, Math.min(avgA, avgB), Math.max(avgA, avgB), state.ranges.avg.min, state.ranges.avg.max);
+
+      // 2) Banda en Price slider: precios que permiten conseguir el avg objetivo actual
+      // ajustando dq en [dqMin..dqMax]. Para eso evaluamos P requerido en extremos (evitando dq=0).
+      const targetAvg = state.newAvgCost;
+      let P1 = null, P2 = null;
+      const epsDQ = Math.max(1, Math.floor(Q0 * 0.0001)); // evita dq ~ 0
+      const dqForMin = Math.max(dqMin, epsDQ);
+      const dqForMax = Math.max(dqMax, epsDQ);
+
+      P1 = solveP(Q0, AC0, dqForMin, targetAvg);
+      P2 = solveP(Q0, AC0, dqForMax, targetAvg);
+
+      if (isFinite(P1) && isFinite(P2)) {
+        setBand(sliderPrice, Math.min(P1,P2), Math.max(P1,P2), state.ranges.price.min, state.ranges.price.max);
+      } else {
+        // si no es resoluble, banda colapsada
+        setBand(sliderPrice, 0, 0, state.ranges.price.min, state.ranges.price.max);
+      }
+
+      // 3) Banda en Qty slider: dq que permitiría alcanzar avg objetivo eligiendo P dentro de [Pmin..Pmax]
+      const Pmin = state.ranges.price.min;
+      const Pmax = state.ranges.price.max;
+
+      const dqAtPmin = solveDQ(Q0, AC0, Pmin, targetAvg);
+      const dqAtPmax = solveDQ(Q0, AC0, Pmax, targetAvg);
+
+      if (isFinitePos(dqAtPmin) && isFinitePos(dqAtPmax)) {
+        setBand(sliderQty, Math.min(dqAtPmin, dqAtPmax), Math.max(dqAtPmin, dqAtPmax), state.ranges.qty.min, state.ranges.qty.max);
+      } else {
+        setBand(sliderQty, 0, 0, state.ranges.qty.min, state.ranges.qty.max);
+      }
+    }
+
+    /* SYNC */
     function syncUI(){
-      // clamp SIEMPRE a rangos congelados
+      // clamp a rangos actuales
       state.additionalQty = clamp(state.additionalQty, state.ranges.qty.min, state.ranges.qty.max);
       state.currentPrice  = clamp(state.currentPrice,  state.ranges.price.min, state.ranges.price.max);
       state.newAvgCost    = clamp(state.newAvgCost,    state.ranges.avg.min, state.ranges.avg.max);
@@ -585,9 +744,10 @@
       lockAvg.checked = !!state.locks.avg;
 
       updateStats();
+      updateBands();
     }
 
-    // Motor de relación según “origen”
+    /* Motor de relación */
     function applyFromQty(){
       const Q0 = state.baseQty, AC0 = state.avgCost, dq = state.additionalQty;
 
@@ -595,7 +755,6 @@
         state.newAvgCost = computeAvgCost(Q0, AC0, dq, state.currentPrice);
         return;
       }
-      // Avg fijo => ajustar P si posible y no lock
       if (!state.locks.price) {
         const P = solveP(Q0, AC0, dq, state.newAvgCost);
         if (P != null && isFinite(P)) state.currentPrice = P;
@@ -609,7 +768,6 @@
         state.newAvgCost = computeAvgCost(Q0, AC0, state.additionalQty, state.currentPrice);
         return;
       }
-      // Avg fijo => ajustar ΔQ si posible y no lock
       if (!state.locks.qty) {
         const dq = solveDQ(Q0, AC0, state.currentPrice, state.newAvgCost);
         if (dq != null && isFinite(dq)) state.additionalQty = dq;
@@ -636,6 +794,7 @@
       }
     }
 
+    /* Init */
     function initIfPossible(){
       if (!baseIsValid()) {
         state.initialized = false;
@@ -647,18 +806,21 @@
       state.initialized = true;
       setOverlayEnabled(true);
 
-      // Congelar rangos en base a inputs base
-      freezeAllRangesFromBase();
-
-      // Defaults (coherentes)
+      // reset a valores coherentes
       state.additionalQty = 0;
       state.currentPrice = state.avgCost;
       state.newAvgCost = state.avgCost;
 
+      // reset params tight
+      state.rangeParams.qtyFactor = 5;
+      state.rangeParams.pricePct = 0.10;
+      state.rangeParams.avgPadPct = 0.00;
+
+      recomputeRangesFromParams();
       syncUI();
     }
 
-    // Events base
+    /* Base input events */
     function onBaseChange(){
       state.baseQty = Math.max(0, Math.floor(toNumber(baseQtyInput.value)));
       state.avgCost = Math.max(0, toNumber(avgCostInput.value));
@@ -669,7 +831,7 @@
       initIfPossible();
     }
 
-    // Slider events (NO recalcular rangos)
+    /* Slider events (NO tocan rangos) */
     function onQtyChange(v){
       if (!state.initialized) return;
       state.additionalQty = toNumber(v);
@@ -693,13 +855,42 @@
       state.locks.qty = lockQty.checked;
       state.locks.price = lockPrice.checked;
       state.locks.avg = lockAvg.checked;
-
-      // si lockeas Avg, proyecta coherencia
       if (state.initialized && state.locks.avg) applyFromAvg();
       syncUI();
     }
 
-    // Wire
+    /* Botones ± */
+    function expandQty(dir){
+      if (!state.initialized) return;
+      const step = 5;
+      const minF = 1;
+      const maxF = 50; // límite de seguridad
+      state.rangeParams.qtyFactor = clamp(state.rangeParams.qtyFactor + dir * step, minF, maxF);
+      recomputeRangesFromParams();
+      syncUI();
+    }
+
+    function expandPrice(dir){
+      if (!state.initialized) return;
+      const step = 0.05; // 5%
+      const minP = 0.05; // 5%
+      const maxP = 1.00; // ±100% (seguridad)
+      state.rangeParams.pricePct = clamp(state.rangeParams.pricePct + dir * step, minP, maxP);
+      recomputeRangesFromParams();
+      syncUI();
+    }
+
+    function expandAvg(dir){
+      if (!state.initialized) return;
+      const step = 0.05; // 5% de AC0
+      const minA = 0.00;
+      const maxA = 2.00; // +200% de AC0 como padding
+      state.rangeParams.avgPadPct = clamp(state.rangeParams.avgPadPct + dir * step, minA, maxA);
+      recomputeRangesFromParams();
+      syncUI();
+    }
+
+    /* Wire */
     baseQtyInput.addEventListener("input", onBaseChange);
     avgCostInput.addEventListener("input", onBaseChange);
 
@@ -735,7 +926,14 @@
     lockPrice.addEventListener("change", onLockToggle);
     lockAvg.addEventListener("change", onLockToggle);
 
-    // Init UI
+    qtyMinus.addEventListener("click", ()=>expandQty(-1));
+    qtyPlus.addEventListener("click", ()=>expandQty(+1));
+    priceMinus.addEventListener("click", ()=>expandPrice(-1));
+    pricePlus.addEventListener("click", ()=>expandPrice(+1));
+    avgMinus.addEventListener("click", ()=>expandAvg(-1));
+    avgPlus.addEventListener("click", ()=>expandAvg(+1));
+
+    /* Init UI */
     setOverlayEnabled(false);
     syncUI();
   </script>
